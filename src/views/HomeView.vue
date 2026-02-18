@@ -83,13 +83,17 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import { useHatim } from '../composables/useHatim';
 import { useRouter } from 'vue-router';
 import BaseModal from '../components/BaseModal.vue';
 
-const { hatims, createHatim, deleteHatim } = useHatim();
+const { hatims, createHatim, deleteHatim, loadAll } = useHatim();
 const router = useRouter();
+
+onMounted(() => {
+  loadAll();
+});
 
 // Create Modal State
 const createModalOpen = ref(false);
@@ -108,11 +112,13 @@ function openCreateModal() {
   });
 }
 
-function createConfirm() {
+async function createConfirm() {
   const name = newHatimName.value.trim() || 'Yeni Hatim';
-  const id = createHatim(name);
-  createModalOpen.value = false;
-  router.push(`/hatim/${id}`);
+  const id = await createHatim(name);
+  if (id) {
+    createModalOpen.value = false;
+    router.push(`/hatim/${id}`);
+  }
 }
 
 function openDeleteModal(id) {
@@ -120,9 +126,9 @@ function openDeleteModal(id) {
   deleteModalOpen.value = true;
 }
 
-function deleteConfirm() {
+async function deleteConfirm() {
   if (deleteId.value) {
-    deleteHatim(deleteId.value);
+    await deleteHatim(deleteId.value);
     deleteId.value = null;
   }
   deleteModalOpen.value = false;

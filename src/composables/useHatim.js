@@ -1,4 +1,5 @@
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { createClient } from '@supabase/supabase-js';
 import ExcelJS from 'exceljs';
 import pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
@@ -10,55 +11,107 @@ if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
     pdfMake.vfs = pdfFonts.vfs;
 }
 
-const STORAGE_KEY = 'hatimAppDB';
-const MAX_PAGES = 604;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const MAX_PAGES = 604;
 const hatims = ref([]);
 
 export function useHatim() {
 
-    // ── STORAGE ──
-    function loadAll() {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            try {
-                hatims.value = JSON.parse(raw);
-            } catch (e) {
-                console.error('Veri yüklenemedi', e);
-            }
+    // ── STORAGE (Supabase) ──
+    async function loadAll() {
+        try {
+            const { data, error } = await supabase
+                .from('hatims')
+                .select('*')
+                .order('created', { ascending: false });
+
+            if (error) throw error;
+            hatims.value = data || [];
+        } catch (e) {
+            console.error('Veri yüklenemedi', e);
         }
     }
 
-    function saveAll() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(hatims.value));
+    async function loadHatim(id) {
+        try {
+            const { data, error } = await supabase
+                .from('hatims')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (e) {
+            console.error('Hatim yüklenemedi', e);
+            return null;
+        }
     }
 
-    // Auto-save on any change
-    watch(hatims, () => {
-        saveAll();
-    }, { deep: true });
-
-    onMounted(() => {
-        if (hatims.value.length === 0) loadAll();
-    });
-
-    // ── CRUD ──
-    function createHatim(name) {
+    // ── CRUD (Supabase) ──
+    async function createHatim(name) {
         const newHatim = {
-            id: Date.now().toString(),
             name: name || 'Yeni Hatim',
             startDate: '',
             endDate: '',
             participants: [],
-            created: Date.now()
+            created: new Date().toISOString()
         };
-        hatims.value.push(newHatim);
-        return newHatim.id;
+
+        try {
+            const { data, error } = await supabase
+                .from('hatims')
+                .insert([newHatim])
+                .select()
+                .single();
+
+            if (error) throw error;
+            hatims.value.unshift(data);
+            return data.id;
+        } catch (e) {
+            console.error('Hatim oluşturulamadı', e);
+            return null;
+        }
     }
 
-    function deleteHatim(id) {
-        const idx = hatims.value.findIndex(h => h.id === id);
-        if (idx !== -1) hatims.value.splice(idx, 1);
+    async function updateHatim(id, updates) {
+        try {
+            const { error } = await supabase
+                .from('hatims')
+                .update(updates)
+                .eq('id', id);
+
+            if (error) throw error;
+
+            // Local update
+            const idx = hatims.value.findIndex(h => h.id === id);
+            if (idx !== -1) {
+                hatims.value[idx] = { ...hatims.value[idx], ...updates };
+            }
+        } catch (e) {
+            console.error('Hatim güncellenemedi', e);
+        }
+    }
+
+    async function deleteHatim(id) {
+        try {
+            const { error } = await supabase
+                .from('hatims')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            hatims.value = hatims.value.filter(h => h.id !== id);
+        } catch (e) {
+            console.error('Hatim silinemedi', e);
+        }
+    }
+
+    function getHatim(id) {
+        return computed(() => hatims.value.find(h => h.id === id));
     }
 
     function getHatim(id) {
