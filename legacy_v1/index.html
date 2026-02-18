@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kur'an Hatim Takip Paneli</title>
+    <meta name="description"
+        content="Kur'an hatim takip paneli – katılımcı listesi yönetimi ve otomatik Excel çıktısı." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="app-header">
+        <div class="header-top">
+            <div class="logo">📖</div>
+            <div>
+                <div class="app-title">Hatim Takip Paneli</div>
+                <div class="app-subtitle">Kur'an Hatim Organizasyonu & Excel Çıktısı</div>
+            </div>
+        </div>
+        <div class="header-fields">
+            <div class="field-group">
+                <label class="field-label" for="hatimName">Hatim Adı</label>
+                <input class="field-input" id="hatimName" type="text" placeholder="Örn: Ramazan Hatmi 2025" />
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="startDate">Başlangıç Tarihi</label>
+                <input class="field-input" id="startDate" type="date" />
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="endDate">Bitiş Tarihi</label>
+                <input class="field-input" id="endDate" type="date" />
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- ADD FORM -->
+        <div class="add-card">
+            <div class="card-header">
+                <span class="card-title">➕ Kişi Ekle</span>
+                <div class="page-counter">
+                    <span class="counter-label">Kalan Sayfa:</span>
+                    <span class="counter-badge" id="remainingBadge">604</span>
+                </div>
+            </div>
+            <div class="add-form">
+                <div class="form-group">
+                    <label class="form-label" for="addFullName">İsim Soyisim</label>
+                    <input class="form-input" id="addFullName" type="text" placeholder="Ahmet Yılmaz" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="addPages">Sayfa Sayısı</label>
+                    <input class="form-input" id="addPages" type="number" min="1" max="604" placeholder="20" />
+                </div>
+                <button class="btn btn-primary" id="addBtn" onclick="addParticipant()">
+                    <span>＋</span> Ekle
+                </button>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-bar" id="progressBar" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- LIST -->
+        <div class="list-card">
+            <div class="list-header">
+                <span class="list-title">👥 Katılımcı Listesi</span>
+                <span class="list-count" id="listCount">0 kişi</span>
+            </div>
+            <div class="table-wrap">
+                <table id="participantTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>İSİM SOYİSİM</th>
+                            <th>SAYFA SAYISI</th>
+                            <th>BAŞLANGIÇ SF.</th>
+                            <th>SIRALA</th>
+                            <th>İŞLEMLER</th>
+                        </tr>
+                    </thead>
+                    <tbody id="participantBody">
+                        <!-- rows injected by JS -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-text">Henüz katılımcı eklenmedi</div>
+                    <div class="empty-sub">Yukarıdaki formu kullanarak kişi ekleyin</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-info" id="footerInfo">Toplam 0 kişi · 0 sayfa kullanıldı</div>
+            <button class="btn btn-success" id="excelBtn" onclick="exportExcel()">
+                Excel İndir
+            </button>
+        </div>
+
+    </main>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
