@@ -1,5 +1,5 @@
 import { ref, computed, onMounted } from 'vue';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../supabase';
 import ExcelJS from 'exceljs';
 import pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
@@ -10,10 +10,6 @@ if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
 } else if (pdfFonts && pdfFonts.vfs) {
     pdfMake.vfs = pdfFonts.vfs;
 }
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const MAX_PAGES = 604;
 const hatims = ref([]);

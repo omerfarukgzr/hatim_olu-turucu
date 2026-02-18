@@ -1,9 +1,5 @@
-import { ref, onMounted } from 'vue';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { ref } from 'vue';
+import { supabase } from '../supabase';
 
 const user = ref(null);
 
