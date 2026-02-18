@@ -122,10 +122,6 @@ export function useHatim() {
         return computed(() => hatims.value.find(h => h.id === id));
     }
 
-    function getHatim(id) {
-        return computed(() => hatims.value.find(h => h.id === id));
-    }
-
     // ── CALCULATIONS ──
     function calculateStats(participants) {
         const total = (participants || []).reduce((s, p) => s + (parseInt(p.pages) || 0), 0);
@@ -351,7 +347,10 @@ export function useHatim() {
 
     return {
         hatims,
+        loadAll,
+        loadHatim,
         createHatim,
+        updateHatim,
         deleteHatim,
         getHatim,
         calculateStats,
