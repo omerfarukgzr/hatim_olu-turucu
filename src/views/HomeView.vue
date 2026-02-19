@@ -1,23 +1,34 @@
 <template>
-  <div class="app-header">
+  <header class="app-header">
     <div class="header-top">
-      <div class="logo">📖</div>
-      <div>
-        <div class="app-title">Hatim Takip Paneli</div>
-        <div class="app-subtitle">Tüm Hatim Organizasyonlarınızı Yönetin</div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="logo">
+          <img src="../assets/logo.png" alt="Hatim Takip Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+        </div>
+        <h1 class="app-title">Hatim Takip</h1>
       </div>
-      <div v-if="user" class="user-info">
-        <span class="user-email">👤 {{ user.email }}</span>
-        <button class="btn btn-ghost" @click="handleLogout">Çıkış Yap 🚪</button>
+      <div v-if="user" class="user-info-section">
+        <UserMenu />
       </div>
     </div>
-  </div>
+  </header>
 
   <main class="main">
     <div class="list-card">
       <div class="list-header">
-        <span class="list-title">📂 Hatim Listesi</span>
-        <button class="btn btn-primary" @click="openCreateModal">➕ Yeni Hatim Oluştur</button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: var(--accent);">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span class="list-title">Hatim Listesi</span>
+        </div>
+        <button class="btn btn-primary" @click="openCreateModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-right: 8px;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Yeni Hatim Oluştur
+        </button>
       </div>
       <div class="table-wrap">
         <table v-if="hatims.length > 0">
@@ -92,19 +103,15 @@ import { useHatim } from '../composables/useHatim';
 import { useAuth } from '../composables/useAuth';
 import { useRouter } from 'vue-router';
 import BaseModal from '../components/BaseModal.vue';
+import UserMenu from '../components/UserMenu.vue';
 
 const { hatims, createHatim, deleteHatim, loadAll } = useHatim();
-const { user, signOut } = useAuth();
+const { user } = useAuth();
 const router = useRouter();
 
 onMounted(() => {
   loadAll();
 });
-
-async function handleLogout() {
-  await signOut();
-  router.push('/login');
-}
 
 // Create Modal State
 const createModalOpen = ref(false);
@@ -157,31 +164,4 @@ function formatDate(d) {
 
 <style scoped>
 .cursor-pointer { cursor: pointer; }
-.text-muted { color: var(--text-muted); }
-.field-group { display: flex; flex-direction: column; gap: 8px; }
-.field-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-.field-input { 
-  background: var(--surface2); border: 1px solid var(--border); 
-  padding: 10px; border-radius: var(--radius-sm); color: var(--text); outline: none; width: 100%;
-}
-.field-input:focus { border-color: var(--accent); }
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.user-email {
-  font-size: 14px;
-  color: var(--text-muted);
-  background: var(--surface2);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-}
 </style>

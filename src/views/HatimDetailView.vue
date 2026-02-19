@@ -2,6 +2,7 @@
   <div v-if="hatim">
     <div class="nav-bar">
       <button class="btn btn-ghost" @click="$router.push('/')">⬅️ Hatim Listesine Dön</button>
+      <UserMenu />
     </div>
 
     <main class="main">
@@ -24,6 +25,7 @@
         @delete="openDeleteModal"
         @move="handleMove"
         @update="handleUpdate"
+        @reorder="handleReorder"
       />
 
       <AppFooter
@@ -62,6 +64,7 @@ import AddParticipantForm from '../components/AddParticipantForm.vue';
 import ParticipantList from '../components/ParticipantList.vue';
 import AppFooter from '../components/AppFooter.vue';
 import BaseModal from '../components/BaseModal.vue';
+import UserMenu from '../components/UserMenu.vue';
 
 const route = useRoute();
 const { hatims, calculateStats, getPersonStartPage, exportExcel, exportPdf, MAX_PAGES, updateHatim, loadHatim } = useHatim();
@@ -119,10 +122,6 @@ function getStartPage(index) {
 }
 
 async function handleAdd({ fullName, pages }) {
-  if (total.value + pages > MAX_PAGES) {
-    show(`Toplam sayfa sayısı 604'ü aşıyor! Kalan: ${remaining.value}`, 'error');
-    return;
-  }
   hatim.value.participants.push({
     id: Date.now().toString(),
     fullName,
@@ -134,23 +133,16 @@ async function handleAdd({ fullName, pages }) {
 
 async function handleAddBatch(newParticipants) {
   let count = 0;
-  let currentTotal = total.value;
   
   newParticipants.sort((a, b) => b.pages - a.pages);
 
   for (const p of newParticipants) {
-    if (currentTotal + p.pages <= MAX_PAGES) {
-      hatim.value.participants.push({
-        id: (Date.now() + Math.random()).toString(),
-        fullName: p.fullName,
-        pages: p.pages
-      });
-      currentTotal += p.pages;
-      count++;
-    } else {
-      show(`Limit doldu! Kalan ${newParticipants.length - count} kişi eklenemedi.`, 'warning');
-      break;
-    }
+    hatim.value.participants.push({
+      id: (Date.now() + Math.random()).toString(),
+      fullName: p.fullName,
+      pages: p.pages
+    });
+    count++;
   }
   
   if (count > 0) {
@@ -189,15 +181,20 @@ async function handleMove(index, direction) {
   }
 }
 
+async function handleReorder({ from, to, position }) {
+  const p = hatim.value.participants;
+  const item = p.splice(from, 1)[0];
+  
+  // Calculate new index after splice
+  let newIndex = to;
+  if (from < to && position === 'top') newIndex = to - 1;
+  else if (from > to && position === 'bottom') newIndex = to + 1;
+  
+  p.splice(newIndex, 0, item);
+  await triggerSave();
+}
+
 async function handleUpdate(index, { fullName, pages }) {
-  const currentPages = hatim.value.participants[index].pages;
-  const otherPages = total.value - currentPages;
-  
-  if (otherPages + pages > MAX_PAGES) {
-    show(`Limit aşılıyor! Kalan: ${MAX_PAGES - otherPages}`, 'error');
-    return;
-  }
-  
   hatim.value.participants[index].fullName = fullName;
   hatim.value.participants[index].pages = pages;
   await triggerSave();
@@ -230,13 +227,28 @@ watch(() => hatim.value?.endDate, triggerSave);
 
 <style scoped>
 .nav-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 101;
 }
 .not-found {
-  padding: 40px;
+  padding: 100px 24px;
   text-align: center;
   color: var(--text-muted);
+}
+.not-found button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
 }
 </style>

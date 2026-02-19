@@ -26,11 +26,18 @@ export function useAuth() {
         return _user;
     }
 
+    async function updateProfile(updates) {
+        const data = await authService.updateUser(updates);
+        user.value = data.user;
+        return data;
+    }
+
     return {
         user,
         signUp,
         signIn,
         signOut,
-        checkUser
+        checkUser,
+        updateProfile
     };
 }

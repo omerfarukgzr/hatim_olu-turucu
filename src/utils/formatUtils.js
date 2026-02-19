@@ -1,3 +1,5 @@
+import { MAX_PAGES } from '../constants';
+
 export const dateUtils = {
     formatToLocale(dateStr) {
         if (!dateStr) return '';
@@ -33,14 +35,27 @@ export const hatimUtils = {
         for (let i = 0; i < index; i++) {
             start += (participants[i].pages || 0);
         }
-        return start;
+        // Wrap around logic for 604 pages
+        return ((start - 1) % MAX_PAGES) + 1;
     },
 
     getDayRange(participants, personIndex, dayIndex) {
         const personStart = this.getPersonStartPage(participants, personIndex);
         const pages = participants[personIndex].pages;
-        const start = personStart + dayIndex * pages;
-        const end = start + pages - 1;
-        return { start, end };
+
+        // Calculate raw start for the specific day
+        // Note: personStart is already wrapped, but we need to calculate 
+        // the offset correctly if we want continuous reading.
+        // If we want person 2 to start where person 1 left off across days...
+        // Actually, the current logic is: person starts at X, and each day they read 'pages' amount.
+
+        let start = personStart + (dayIndex * pages);
+        let end = start + pages - 1;
+
+        return {
+            start: ((start - 1) % MAX_PAGES) + 1,
+            end: ((end - 1) % MAX_PAGES) + 1
+        };
     }
 };
+

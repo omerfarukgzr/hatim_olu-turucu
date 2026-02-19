@@ -21,5 +21,11 @@ export const authService = {
     async getCurrentUser() {
         const { data: { user } } = await supabase.auth.getUser();
         return user;
+    },
+
+    async updateUser(updates) {
+        const { data, error } = await supabase.auth.updateUser(updates);
+        if (error) throw error;
+        return data;
     }
 };

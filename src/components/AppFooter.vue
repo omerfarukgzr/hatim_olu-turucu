@@ -36,61 +36,66 @@ defineEmits(['export', 'exportPdf']);
 
 <style scoped>
 .footer-card {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border-top: 1px solid var(--border-soft);
+  padding: 24px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   bottom: 0;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   z-index: 10;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.03);
 }
 
 .stats {
   display: flex;
-  gap: 20px;
+  gap: 32px;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .stat-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 500;
 }
 
 .stat-value {
-  font-size: 18px;
+  font-family: 'Lora', serif;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--accent);
 }
 
 .actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  border: none; border-radius: var(--radius-sm); cursor: pointer;
-  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; padding: 10px 18px;
-  transition: all 0.2s; white-space: nowrap; height: 40px; 
-}
-.btn-success { background: linear-gradient(135deg, var(--green), #16a34a); color: #fff; }
 .btn-outline { 
-  background: transparent; border: 1px solid var(--border); color: var(--text); 
+  background: #fff; 
+  border: 1px solid var(--border); 
+  color: var(--text-muted); 
 }
-.btn-outline:hover { background: var(--surface2); border-color: var(--text-muted); }
+
+.btn-outline:hover { 
+  background: var(--bg-alt); 
+  color: var(--text); 
+  border-color: var(--accent); 
+}
 
 @media (max-width: 600px) {
-  .footer-card { flex-direction: column; gap: 16px; align-items: stretch; }
-  .stats { justify-content: space-between; }
+  .footer-card { flex-direction: column; gap: 20px; align-items: stretch; padding: 20px; border-radius: 0; }
+  .stats { justify-content: space-between; gap: 12px; }
   .actions { flex-direction: column; }
   .btn { width: 100%; }
 }

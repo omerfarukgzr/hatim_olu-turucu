@@ -72,10 +72,18 @@ export function useHatim() {
 
     function calculateStats(participants) {
         const total = (participants || []).reduce((s, p) => s + (parseInt(p.pages) || 0), 0);
-        const remaining = MAX_PAGES - total;
-        const percentage = (total / MAX_PAGES) * 100;
+        const cycleUsed = total % MAX_PAGES;
+
+        if (total > 0 && cycleUsed === 0) {
+            return { total, remaining: 0, percentage: 100 };
+        }
+
+        const remaining = MAX_PAGES - cycleUsed;
+        const percentage = (cycleUsed / MAX_PAGES) * 100;
         return { total, remaining, percentage };
     }
+
+
 
     return {
         hatims,

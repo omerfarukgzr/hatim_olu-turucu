@@ -41,34 +41,4 @@ defineEmits(['update:hatimName', 'update:startDate', 'update:endDate']);
 }
 
 .hatim-name { width: 100%; }
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--t-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-left: 4px;
-}
-
-.card-header {
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  margin-left: -24px;
-  margin-right: -24px;
-  padding-left: 24px;
-}
-
-.card-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
-}
 </style>

@@ -12,12 +12,25 @@
             <th>İSİM SOYİSİM</th>
             <th>SAYFA SAYISI</th>
             <th>BAŞLANGIÇ SF.</th>
-            <th>SIRALA</th>
             <th>İŞLEMLER</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(p, index) in participants" :key="p.id">
+          <tr 
+            v-for="(p, index) in participants" 
+            :key="p.id"
+            draggable="true"
+            @dragstart="onDragStart(index)"
+            @dragover.prevent="onDragOver($event, index)"
+            @drop="onDrop(index)"
+            @dragend="onDragEnd"
+            :class="{ 
+              'is-dragging': draggedIndex === index,
+              'drag-over-top': dragOverIndex === index && dropPosition === 'top',
+              'drag-over-bottom': dragOverIndex === index && dropPosition === 'bottom'
+            }"
+            class="draggable-row"
+          >
             <td class="td-num">{{ index + 1 }}</td>
             <td class="td-name">
               <input v-if="editingId === p.id" v-model="editName" class="inline-edit" type="text" />
@@ -28,12 +41,6 @@
               <span v-else>{{ p.pages }}</span>
             </td>
             <td class="td-range">Sf. {{ getStartPage(index) }}</td>
-            <td>
-              <div class="td-actions">
-                <button class="btn btn-ghost btn-icon" title="Yukarı" @click="$emit('move', index, 'up')" :disabled="index === 0">▲</button>
-                <button class="btn btn-ghost btn-icon" title="Aşağı" @click="$emit('move', index, 'down')" :disabled="index === participants.length - 1">▼</button>
-              </div>
-            </td>
             <td>
               <div class="td-actions" v-if="editingId === p.id">
                 <button class="btn btn-primary btn-icon" title="Kaydet" @click="save(index)">💾</button>
@@ -64,11 +71,81 @@ const props = defineProps({
   getStartPage: Function
 });
 
-const emit = defineEmits(['delete', 'move', 'update']);
+const emit = defineEmits(['delete', 'move', 'update', 'reorder']);
 
 const editingId = ref(null);
 const editName = ref('');
 const editPages = ref('');
+
+// Drag & Drop State
+const draggedIndex = ref(null);
+const dragOverIndex = ref(null);
+const dropPosition = ref(null); // 'top' or 'bottom'
+let scrollInterval = null;
+
+function onDragStart(index) {
+  draggedIndex.value = index;
+}
+
+function onDragOver(event, index) {
+  dragOverIndex.value = index;
+  const rect = event.currentTarget.getBoundingClientRect();
+  const relativeY = event.clientY - rect.top;
+  
+  if (relativeY < rect.height / 2) {
+    dropPosition.value = 'top';
+  } else {
+    dropPosition.value = 'bottom';
+  }
+
+  // Auto-scroll logic
+  const threshold = 100; // px from edge
+  const speed = 15;
+  const viewportHeight = window.innerHeight;
+
+  if (event.clientY > viewportHeight - threshold) {
+    // Scroll down
+    if (!scrollInterval) {
+      scrollInterval = setInterval(() => {
+        window.scrollBy({ top: speed, behavior: 'auto' });
+      }, 16);
+    }
+  } else if (event.clientY < threshold) {
+    // Scroll up
+    if (!scrollInterval) {
+      scrollInterval = setInterval(() => {
+        window.scrollBy({ top: -speed, behavior: 'auto' });
+      }, 16);
+    }
+  } else {
+    stopScroll();
+  }
+}
+
+function stopScroll() {
+  if (scrollInterval) {
+    clearInterval(scrollInterval);
+    scrollInterval = null;
+  }
+}
+
+function onDragEnd() {
+  draggedIndex.value = null;
+  dragOverIndex.value = null;
+  dropPosition.value = null;
+  stopScroll();
+}
+
+function onDrop(toIndex) {
+  stopScroll();
+  if (draggedIndex.value !== null) {
+    emit('reorder', { 
+      from: draggedIndex.value, 
+      to: toIndex,
+      position: dropPosition.value 
+    });
+  }
+}
 
 function startEdit(p) {
   editingId.value = p.id;
@@ -90,3 +167,36 @@ function save(index) {
   cancelEdit();
 }
 </script>
+
+<style scoped>
+.draggable-row {
+  cursor: grab;
+  transition: var(--transition);
+}
+
+.draggable-row:active {
+  cursor: grabbing;
+}
+
+.is-dragging {
+  opacity: 0.4;
+  background: var(--surface-alt);
+}
+
+.drag-over-top {
+  box-shadow: inset 0 3px 0 0 var(--accent) !important;
+}
+
+.drag-over-bottom {
+  box-shadow: inset 0 -3px 0 0 var(--accent) !important;
+}
+
+.inline-edit {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: inherit;
+}
+</style>

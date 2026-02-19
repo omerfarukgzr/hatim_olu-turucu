@@ -1,10 +1,11 @@
 <template>
-  <header class="app-header glass">
+  <header class="app-header">
     <div class="header-top">
-      <div class="logo">📖</div>
+      <div class="logo">
+        <img src="../assets/logo.png" alt="Hatim Takip Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+      </div>
       <div>
-        <div class="app-title">Hatim Takip Paneli</div>
-        <div class="app-subtitle">Kur'an Hatim Organizasyonu & Excel Çıktısı</div>
+        <h1 class="app-title">Hatim Takip</h1>
       </div>
     </div>
     <div class="header-fields">

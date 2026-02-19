@@ -38,27 +38,26 @@ defineEmits(['close', 'confirm']);
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(45, 52, 54, 0.4);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
 }
 
 .modal-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 32px;
   width: 90%;
-  max-width: 420px;
+  max-width: 460px;
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 24px;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-header {
@@ -68,34 +67,40 @@ defineEmits(['close', 'confirm']);
 }
 
 .modal-header h3 {
-  font-size: 18px;
+  font-family: 'Lora', serif;
+  font-size: 22px;
   font-weight: 700;
+  color: var(--accent);
 }
 
 .btn-close {
-  background: none;
+  background: var(--bg-alt);
   border: none;
   color: var(--text-muted);
-  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 4px;
+  transition: var(--transition);
 }
 
-.btn-close:hover { color: var(--text); }
+.btn-close:hover { 
+  background: var(--border-soft);
+  color: var(--text); 
+}
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  margin-top: 8px;
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(30px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 </style>
