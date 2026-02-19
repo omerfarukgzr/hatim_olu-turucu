@@ -83,7 +83,7 @@
 
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useHatim } from '../composables/useHatim';
 import { useToast } from '../composables/useToast';
 
@@ -96,6 +96,7 @@ import UserMenu from '../components/UserMenu.vue';
 import ThemeToggle from '../components/ThemeToggle.vue';
 
 const route = useRoute();
+const router = useRouter();
 const { hatims, calculateStats, getPersonStartPage, exportExcel, exportPdf, MAX_PAGES, updateHatim, loadHatim } = useHatim();
 const { show } = useToast();
 
@@ -249,8 +250,11 @@ function handleExportPdf() {
 }
 
 function handleCopyLink() {
-  const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash if exists
-  const url = `${window.location.origin}${base}/takip/${hatim.value.id}`;
+  const resolved = router.resolve({ 
+    name: 'participant-detail', 
+    params: { id: hatim.value.id } 
+  });
+  const url = `${window.location.origin}${resolved.href}`;
   navigator.clipboard.writeText(url);
   show('Takip linki kopyalandı! Bu linki katılımcılara gönderebilirsiniz.', 'success');
 }
