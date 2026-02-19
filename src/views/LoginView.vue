@@ -132,7 +132,7 @@ async function handleSubmit() {
 .field-label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
 .field-input {
   width: 100%;
-  background: var(--surface-alt);
+  background: var(--bg);
   border: 1px solid var(--border);
   padding: 14px;
   border-radius: var(--radius-md);
@@ -140,7 +140,26 @@ async function handleSubmit() {
   outline: none;
   font-size: 15px;
 }
-.field-input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px var(--accent-soft); }
+.field-input:focus { 
+  border-color: var(--accent); 
+  background: var(--surface); 
+  box-shadow: 0 0 0 4px var(--accent-soft); 
+}
+
+/* Autofill styles */
+.field-input:-webkit-autofill,
+.field-input:-webkit-autofill:hover, 
+.field-input:-webkit-autofill:focus, 
+.field-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--bg) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.field-input::placeholder {
+  color: var(--text-dim);
+}
+
 .w-full { width: 100%; margin-top: 12px; }
 .toggle-text { margin-top: 28px; font-size: 14px; color: var(--text-muted); }
 .toggle-text a { color: var(--accent); cursor: pointer; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }

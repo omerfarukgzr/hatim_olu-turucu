@@ -183,7 +183,7 @@ const vClickOutside = {
   top: 100%;
   right: 0;
   margin-top: 8px;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
@@ -234,7 +234,8 @@ const vClickOutside = {
 }
 
 .dropdown-item.logout:hover {
-  background: #fff5f5;
+  background: var(--accent-soft);
+  color: var(--red);
 }
 
 .item-icon {
