@@ -35,6 +35,7 @@
       <div v-else-if="!selectedParticipant" class="entry-card">
         <div class="input-group" style="margin-bottom: 20px;">
           <input 
+            ref="searchInput"
             v-model="searchQuery" 
             type="text" 
             placeholder="🔍 İsim ara..."
@@ -57,7 +58,7 @@
           </div>
         </div>
 
-        <button class="btn-ghost" @click="hatim = null">⬅️ Başka Hatim Girişi</button>
+        <button class="btn-ghost" @click="resetView">⬅️ Başka Hatim Girişi</button>
       </div>
 
       <div v-else class="schedule-card">
@@ -85,10 +86,28 @@
             <span class="label">Günlük</span>
             <span class="value">{{ selectedParticipant.pages }} Sayfa</span>
           </div>
+          <div class="info-item progress">
+            <span class="label">İlerleme</span>
+            <div class="mini-progress">
+              <div class="bar" :style="{ width: progressPercentage + '%' }"></div>
+            </div>
+            <span class="value">{{ progressPercentage }}%</span>
+          </div>
         </div>
 
         <div class="days-list">
-          <div v-for="(date, idx) in dates" :key="idx" class="day-row">
+          <div 
+            v-for="(date, idx) in dates" 
+            :key="idx" 
+            class="day-row"
+            :class="{ 'is-checked': isDayChecked(idx) }"
+            @click="toggleDay(idx)"
+          >
+            <div class="day-check">
+              <div class="checkbox" :class="{ 'checked': isDayChecked(idx) }">
+                <svg v-if="isDayChecked(idx)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            </div>
             <div class="day-info">
               <span class="day-name">{{ dateUtils.formatDayName(date) }}</span>
               <span class="day-date">{{ dateUtils.formatToLocale(date) }}</span>
@@ -104,14 +123,14 @@
           <strong>Önemli Not:</strong> 600. sayfaya denk geldiğiniz için hatmin sonundaki 4 sayfayı da (kısa sureler) okumanız gerekmektedir.
         </div>
 
-        <button class="btn-ghost" style="margin-top: 24px;" @click="selectedParticipant = null">⬅️ Geri Dön</button>
+        <button class="btn-ghost" style="margin-top: 24px;" @click="handleBackToParticipants">⬅️ Geri Dön</button>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useHatim } from '../composables/useHatim';
 import { dateUtils, hatimUtils } from '../utils/formatUtils';
@@ -129,6 +148,45 @@ const searchQuery = ref('');
 const loading = ref(false);
 const selectedParticipant = ref(null);
 const selectedIndex = ref(-1);
+const checkedDays = ref([]);
+const searchInput = ref(null);
+
+// Progress persistence
+function loadProgress() {
+  if (!hatim.value || !selectedParticipant.value) return;
+  const key = `progress-${hatim.value.id}-${selectedParticipant.value.id}`;
+  const stored = localStorage.getItem(key);
+  if (stored) {
+    checkedDays.value = JSON.parse(stored);
+  } else {
+    checkedDays.value = [];
+  }
+}
+
+function saveProgress() {
+  if (!hatim.value || !selectedParticipant.value) return;
+  const key = `progress-${hatim.value.id}-${selectedParticipant.value.id}`;
+  localStorage.setItem(key, JSON.stringify(checkedDays.value));
+}
+
+function toggleDay(idx) {
+  const index = checkedDays.value.indexOf(idx);
+  if (index === -1) {
+    checkedDays.value.push(idx);
+  } else {
+    checkedDays.value.splice(index, 1);
+  }
+  saveProgress();
+}
+
+function isDayChecked(idx) {
+  return checkedDays.value.includes(idx);
+}
+
+const progressPercentage = computed(() => {
+  if (dates.value.length === 0) return 0;
+  return Math.round((checkedDays.value.length / dates.value.length) * 100);
+});
 
 const filteredParticipants = computed(() => {
   if (!hatim.value) return [];
@@ -171,6 +229,19 @@ async function handleLoadHatim() {
     const data = await loadHatim(hatimIdInput.value);
     if (data) {
       hatim.value = data;
+      // Update URL if it matches
+      if (route.params.id !== hatimIdInput.value) {
+        router.replace({ name: 'participant-detail', params: { id: hatimIdInput.value } });
+      }
+      
+      // Auto-select participant if 'p' query exists
+      const pName = route.query.p;
+      if (pName && data.participants) {
+        const pIdx = data.participants.findIndex(p => p.fullName === pName);
+        if (pIdx !== -1) {
+          selectParticipant(data.participants[pIdx], pIdx, false); // false to avoid redundant URL update
+        }
+      }
     } else {
       show('Hatim bulunamadı. Lütfen kodu kontrol edin.', 'error');
     }
@@ -181,11 +252,70 @@ async function handleLoadHatim() {
   }
 }
 
-function selectParticipant(p, idx) {
+// Focus listener for the search field
+watch([hatim, selectedParticipant], ([h, p]) => {
+  if (h && !p) {
+    // Small delay to ensure DOM is fully rendered after condition changes
+    setTimeout(() => {
+      if (searchInput.value) {
+        searchInput.value.focus();
+        // Fallback for some browsers
+        searchInput.value.click();
+      }
+    }, 50);
+  }
+}, { immediate: true });
+
+function resetView() {
+  hatim.value = null;
+  hatimIdInput.value = '';
+  router.replace({ name: 'participant-login' });
+}
+
+// Watch for route changes (e.g. back button)
+watch(() => route.params.id, async (newId) => {
+  if (newId) {
+    hatimIdInput.value = newId;
+    if (!hatim.value || hatim.value.id !== newId) {
+      await handleLoadHatim();
+    }
+  } else {
+    hatim.value = null;
+    hatimIdInput.value = '';
+  }
+});
+
+watch(() => route.query.p, (newP) => {
+  if (!newP) {
+    selectedParticipant.value = null;
+    selectedIndex.value = -1;
+  } else if (hatim.value && (!selectedParticipant.value || selectedParticipant.value.fullName !== newP)) {
+    const pIdx = hatim.value.participants.findIndex(p => p.fullName === newP);
+    if (pIdx !== -1) {
+      selectedParticipant.value = hatim.value.participants[pIdx];
+      selectedIndex.value = pIdx;
+      loadProgress();
+    }
+  }
+});
+
+function selectParticipant(p, idx, updateUrl = true) {
   selectedParticipant.value = p;
   selectedIndex.value = idx;
+  loadProgress();
+  
+  if (updateUrl) {
+    router.push({ 
+      query: { ...route.query, p: p.fullName } 
+    });
+  }
+  
   // Browser history updates so sharing specific view is easier
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleBackToParticipants() {
+  router.back();
 }
 
 const dates = computed(() => {
@@ -464,10 +594,10 @@ function handleExportPdf() {
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
   margin-bottom: 32px;
-  padding: 16px;
+  padding: 20px;
   background: var(--accent-soft);
   border-radius: var(--radius-md);
 }
@@ -475,7 +605,29 @@ function handleExportPdf() {
 .info-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+}
+
+.info-item.progress {
+  grid-column: span 2;
+  margin-top: 4px;
+  border-top: 1px solid rgba(74, 103, 65, 0.1);
+  padding-top: 12px;
+}
+
+.mini-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.mini-progress .bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
 .info-item .label {
@@ -487,19 +639,19 @@ function handleExportPdf() {
 }
 
 .info-item .value {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text);
 }
 
 .days-list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--border-soft);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--border-soft);
+  gap: 8px;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  border: none;
 }
 
 .day-row {
@@ -508,16 +660,68 @@ function handleExportPdf() {
   align-items: center;
   padding: 16px 20px;
   background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.day-row:hover {
+  transform: translateX(4px);
+  border-color: var(--accent);
+}
+
+.day-row.is-checked {
+  background: var(--bg-alt);
+  border-color: transparent;
+  opacity: 0.7;
+}
+
+.day-row.is-checked .day-name,
+.day-row.is-checked .page-range {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.day-check {
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: var(--transition);
+  background: var(--surface);
+}
+
+.checkbox.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkbox svg {
+  width: 16px;
+  height: 16px;
 }
 
 .day-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .day-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
+  transition: var(--transition);
 }
 
 .day-date {
