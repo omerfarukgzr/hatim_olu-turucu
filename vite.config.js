@@ -35,9 +35,23 @@ export default defineConfig({
             purpose: 'any maskable'
           }
         ]
+      },
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024 // 5MB
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-excel': ['exceljs'],
+          'vendor-pdf': ['pdfmake'],
+          'vendor-supabase': ['@supabase/supabase-js']
+        }
+      }
+    }
+  },
   server: {
     host: true
   },
