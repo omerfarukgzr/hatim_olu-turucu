@@ -144,16 +144,41 @@ export function useHatim() {
         return { total, remaining, percentage };
     }
 
-    function calculateReadingProgress(participants) {
+    function calculateReadingProgress(participants, startDate, endDate) {
         if (!participants || participants.length === 0) return 0;
 
+        // Calculate total days in the period
+        let totalDays = 0;
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (!isNaN(start) && !isNaN(end)) {
+                const diffTime = Math.abs(end - start);
+                totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            }
+        }
+
         let totalRead = 0;
+        let totalToRead = 0;
+
         participants.forEach(p => {
+            const pages = parseInt(p.pages) || 0;
             const checkedCount = p.checkedDays ? p.checkedDays.length : 0;
-            totalRead += checkedCount * (parseInt(p.pages) || 0);
+            totalRead += checkedCount * pages;
+            
+            // If dates are set, calculate total assigned pages for the period
+            // Otherwise, fallback to 600 as a reference for a single hatim
+            if (totalDays > 0) {
+                totalToRead += totalDays * pages;
+            }
         });
 
-        const progress = (totalRead / MAX_PAGES) * 100;
+        // Fallback: If no dates are set or period is 0, use MAX_PAGES (600) as denominator
+        if (totalToRead === 0) {
+            totalToRead = MAX_PAGES;
+        }
+
+        const progress = (totalRead / totalToRead) * 100;
         return Math.min(progress, 100);
     }
 

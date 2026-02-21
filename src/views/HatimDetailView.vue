@@ -211,7 +211,11 @@ const distributionPercentage = computed(() => stats.value.percentage);
 
 const readingPercentage = computed(() => {
   if (!hatim.value) return 0;
-  return calculateReadingProgress(hatim.value.participants);
+  return calculateReadingProgress(
+    hatim.value.participants, 
+    hatim.value.start_date, 
+    hatim.value.end_date
+  );
 });
 
 // Delete Modal State
