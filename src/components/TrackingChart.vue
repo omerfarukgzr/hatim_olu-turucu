@@ -581,4 +581,56 @@ function goToParticipantPage(fullName) {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    gap: 8px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-icon {
+    font-size: 20px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .compact-list-header, 
+  .compact-row {
+    grid-template-columns: 2fr 1.2fr 1fr; /* Removed one column or merged */
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .cr-pages {
+    display: none; /* Hide pages/day on mobile to save space */
+  }
+
+  .sort-btn:nth-child(2) {
+    display: none;
+  }
+
+  .cr-pct {
+    font-size: 11px;
+    min-width: unset;
+  }
+
+  .cr-bar {
+    display: none; /* Hide progress bar on mobile to save space */
+  }
+}
+
+@media (max-width: 400px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

@@ -8,8 +8,11 @@
         <h1 class="nav-title">Hatim Takip</h1>
       </div>
       
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <button class="btn btn-ghost" @click="$router.push('/')">⬅️ Listeye Dön</button>
+      <div class="nav-actions">
+        <button class="btn btn-ghost nav-back-btn" @click="$router.push('/')">
+          <span class="btn-icon-only">⬅️</span>
+          <span class="btn-text">Listeye Dön</span>
+        </button>
         <ThemeToggle />
         <UserMenu />
       </div>
@@ -366,6 +369,18 @@ watch(() => hatim.value?.end_date, triggerSave);
   z-index: 101;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .nav-bar .logo {
   width: 40px;
   height: 40px;
@@ -623,5 +638,82 @@ watch(() => hatim.value?.end_date, triggerSave);
 .info-text strong {
   color: var(--text);
   font-weight: 600;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .nav-bar {
+    padding: 12px 16px;
+  }
+
+  .nav-title {
+    font-size: 18px;
+  }
+
+  .summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .nav-actions {
+    gap: 8px !important;
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .nav-back-btn {
+    padding: 8px !important;
+    min-width: 40px;
+  }
+
+  .main {
+    padding: 20px 16px;
+  }
+
+  .hatim-summary-card {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .summary-name {
+    font-size: 20px;
+  }
+
+  .tabs-container {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 8px;
+  }
+
+  .tabs {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    padding: 4px;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .info-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-title {
+    display: none;
+  }
 }
 </style>

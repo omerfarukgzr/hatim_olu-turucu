@@ -860,14 +860,42 @@ function handleExportPdf() {
 }
 
 @media (max-width: 480px) {
+  .loading-state {
+    padding: 32px 0;
+  }
+
+  .main-content {
+    padding: 16px 12px;
+  }
+
+  .entry-card, .schedule-card {
+    padding: 20px 16px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .info-tag {
+    font-size: 11px;
+  }
+
   .info-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
+    padding: 16px;
   }
+  
+  .day-row {
+    padding: 12px;
+  }
+
   .schedule-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
+  
   .btn-download {
     width: 100%;
     justify-content: center;

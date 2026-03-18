@@ -19,10 +19,10 @@
         Takip Linki
       </button>
       <button class="btn btn-outline" @click="$emit('exportPdf')" title="PDF İndir">
-        PDF İndir
+        PDF <span class="hide-on-mobile">İndir</span>
       </button>
       <button class="btn btn-success" @click="$emit('export')" title="Excel İndir">
-        Excel İndir
+        Excel <span class="hide-on-mobile">İndir</span>
       </button>
     </div>
   </div>
@@ -104,20 +104,43 @@ defineEmits(['export', 'exportPdf', 'copyLink']);
 @media (max-width: 600px) {
   .footer-card { 
     flex-direction: column; 
-    gap: 24px; 
-    align-items: stretch; 
-    padding: 20px; 
+    gap: 12px; 
+    padding: 12px 16px; 
     border-radius: 0; 
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
   }
   .stats { 
     justify-content: space-around; 
-    gap: 12px; 
+    gap: 4px; 
+    padding: 0;
+    width: 100%;
   }
-  .no-actions .stats {
-    gap: 20px;
+  .stat-item {
+    gap: 2px;
+  }
+  .stat-value {
+    font-size: 18px;
+  }
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0;
   }
   .actions { 
-    flex-direction: column; 
+    flex-direction: row; /* Horizontal buttons on mobile too */
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .actions .btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    gap: 4px;
+  }
+  .hide-on-mobile {
+    display: none;
   }
 }
 </style>
