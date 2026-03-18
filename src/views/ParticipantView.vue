@@ -3,7 +3,7 @@
     <div class="nav-bar">
       <div class="logo-container" @click="$router.push('/')">
         <div class="logo">
-          <img src="../assets/logo.png" alt="Logo" />
+          <img :src="logoUrl" alt="Logo" />
         </div>
         <h1 class="nav-title">Hatim Takip</h1>
       </div>
@@ -145,6 +145,8 @@ import { useHatim } from '../composables/useHatim';
 import { dateUtils, hatimUtils } from '../utils/formatUtils';
 import { useToast } from '../composables/useToast';
 import { exportService } from '../utils/exportUtils';
+import logoUrl from '../assets/logo.png';
+
 
 const route = useRoute();
 const router = useRouter();
