@@ -22,21 +22,21 @@
           <button 
             class="tab-btn" 
             :class="{ active: activeTab === 'list' }" 
-            @click="activeTab = 'list'"
+            @click="setTab('list')"
           >
             Katılımcı Listesi
           </button>
           <button 
             class="tab-btn" 
             :class="{ active: activeTab === 'tracking' }" 
-            @click="activeTab = 'tracking'"
+            @click="setTab('tracking')"
           >
             Takip Çizelgesi
           </button>
           <button 
             class="tab-btn" 
             :class="{ active: activeTab === 'settings' }" 
-            @click="activeTab = 'settings'"
+            @click="setTab('settings')"
           >
             Hatim Bilgisi
           </button>
@@ -170,7 +170,17 @@ const { show } = useToast();
 
 const hatim = ref(null);
 const isLoading = ref(true);
-const activeTab = ref('list');
+
+// Tab: URL query'den oku, yoksa 'list'
+const VALID_TABS = ['list', 'tracking', 'settings'];
+const activeTab = ref(
+  VALID_TABS.includes(route.query.tab) ? route.query.tab : 'list'
+);
+
+function setTab(tab) {
+  activeTab.value = tab;
+  router.replace({ query: { ...route.query, tab } });
+}
 
 onMounted(async () => {
   const id = route.params.id;

@@ -86,10 +86,27 @@
         </button>
       </div>
       <div class="table-wrap">
-        <table v-if="hatims.length > 0">
+        <!-- Loading Skeleton -->
+        <div v-if="isLoading" class="skeleton-container">
+          <div class="skeleton-header">
+            <div class="skeleton-cell skeleton-wide"></div>
+            <div class="skeleton-cell skeleton-mid"></div>
+            <div class="skeleton-cell skeleton-small"></div>
+            <div class="skeleton-cell skeleton-small"></div>
+          </div>
+          <div v-for="i in 4" :key="i" class="skeleton-row" :style="{ animationDelay: (i * 0.08) + 's' }">
+            <div class="skeleton-cell skeleton-wide"></div>
+            <div class="skeleton-cell skeleton-mid"></div>
+            <div class="skeleton-cell skeleton-small"></div>
+            <div class="skeleton-cell skeleton-tiny"></div>
+          </div>
+        </div>
+
+        <!-- Loaded Table -->
+        <table v-else-if="hatims.length > 0">
           <thead>
             <tr>
-              <th>HATIM ADI</th>
+              <th>HATİM ADI</th>
               <th>TARİH ARALIĞI</th>
               <th>KİŞİ SAYISI</th>
               <th>İŞLEMLER</th>
@@ -179,7 +196,7 @@ import BaseModal from '../components/BaseModal.vue';
 import UserMenu from '../components/UserMenu.vue';
 import ThemeToggle from '../components/ThemeToggle.vue';
 
-const { hatims, createHatim, deleteHatim, loadAll } = useHatim();
+const { hatims, isLoading, createHatim, deleteHatim, loadAll } = useHatim();
 const { user } = useAuth();
 const router = useRouter();
 
@@ -242,6 +259,62 @@ function formatDate(d) {
 
 <style scoped>
 .cursor-pointer { cursor: pointer; }
+
+/* ── SKELETON LOADING ── */
+.skeleton-container {
+  padding: 4px 0;
+}
+
+.skeleton-header {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 4px;
+}
+
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  animation: skeleton-fadein 0.4s ease both;
+}
+
+@keyframes skeleton-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.skeleton-cell {
+  height: 16px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--border-soft) 25%,
+    var(--surface-alt) 50%,
+    var(--border-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite ease-in-out;
+}
+
+.skeleton-header .skeleton-cell {
+  height: 12px;
+  opacity: 0.5;
+}
+
+.skeleton-wide  { width: 100%; }
+.skeleton-mid   { width: 80%; }
+.skeleton-small { width: 50%; }
+.skeleton-tiny  { width: 36px; }
+
+@keyframes skeleton-shimmer {
+  0%   { background-position:  200% 0; }
+  100% { background-position: -200% 0; }
+}
 .user-info-section {
   display: flex;
   align-items: center;

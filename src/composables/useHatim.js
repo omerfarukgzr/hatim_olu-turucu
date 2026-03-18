@@ -6,6 +6,7 @@ import { exportService } from '../utils/exportUtils';
 import { MAX_PAGES, STORAGE_KEY } from '../constants';
 
 const hatims = ref([]);
+const isLoading = ref(false);
 
 export function useHatim() {
 
@@ -23,16 +24,19 @@ export function useHatim() {
     }
 
     async function loadAll() {
-        const user = await authService.getCurrentUser();
-        if (!user) {
-            // Guest mode: load from local storage
-            hatims.value = getLocalHatims();
-            return;
-        }
+        isLoading.value = true;
         try {
+            const user = await authService.getCurrentUser();
+            if (!user) {
+                // Guest mode: load from local storage
+                hatims.value = getLocalHatims();
+                return;
+            }
             hatims.value = await hatimService.getAllByUser(user.id);
         } catch (e) {
             console.error('Hatimler yüklenemedi', e);
+        } finally {
+            isLoading.value = false;
         }
     }
 
@@ -186,6 +190,7 @@ export function useHatim() {
 
     return {
         hatims,
+        isLoading,
         loadAll,
         loadHatim,
         createHatim,
